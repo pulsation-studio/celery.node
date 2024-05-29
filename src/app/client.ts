@@ -1,7 +1,7 @@
-import { v4 } from "uuid";
+import {v4} from "uuid";
 import Base from "./base";
 import Task from "./task";
-import { AsyncResult } from "./result";
+import {AsyncResult} from "./result";
 
 export class TaskMessage {
   constructor(

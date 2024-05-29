@@ -1,6 +1,5 @@
 import Base from "./base";
-import { Message } from "../kombu/message";
-import {newCeleryBroker} from "../kombu/brokers";
+import {Message} from "../kombu/message";
 import {createClient} from "../index";
 import Client, {TaskMessage} from "./client";
 
