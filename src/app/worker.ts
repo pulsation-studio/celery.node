@@ -195,6 +195,12 @@ export default class Worker extends Base {
     throw new Error("not implemented yet");
   }
 
+  /**
+   * @method Worker#sendChainTask
+   * @param chain the chain sent by the local/remote client
+   * @param requestMessage the message sent by the local/remote client
+   * @private
+   */
   private sendChainTask(chain: Array<any>, requestMessage: Message): void {
     const chainToSend: any[] = chain;
     const children = chainToSend.pop();
