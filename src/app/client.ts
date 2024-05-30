@@ -1,14 +1,14 @@
-import {v4} from "uuid";
+import { v4 } from "uuid";
 import Base from "./base";
 import Task from "./task";
-import {AsyncResult} from "./result";
+import { AsyncResult } from "./result";
 
 export class TaskMessage {
   constructor(
-      readonly headers: object,
-      readonly properties: object,
-      readonly body: [Array<any>, object, object] | object,
-      readonly sentEvent: object
+    readonly headers: object,
+    readonly properties: object,
+    readonly body: [Array<any>, object, object] | object,
+    readonly sentEvent: object
   ) {}
 }
 
@@ -30,21 +30,21 @@ export default class Client extends Base {
     // const serializer = 'json';
 
     this.isReady().then(() =>
-        this.broker.publish(
-            body,
-            exchange,
-            this.conf.CELERY_QUEUE,
-            headers,
-            properties
-        )
+      this.broker.publish(
+        body,
+        exchange,
+        this.conf.CELERY_QUEUE,
+        headers,
+        properties
+      )
     );
   }
 
   public asTaskV2(
-      taskId: string,
-      taskName: string,
-      args?: Array<any>,
-      kwargs?: object
+    taskId: string,
+    taskName: string,
+    args?: Array<any>,
+    kwargs?: object
   ): TaskMessage {
     const message: TaskMessage = {
       headers: {
@@ -87,10 +87,10 @@ export default class Client extends Base {
    * @returns {String} JSON serialized string of celery task message
    */
   public asTaskV1(
-      taskId: string,
-      taskName: string,
-      args?: Array<any>,
-      kwargs?: object
+    taskId: string,
+    taskName: string,
+    args?: Array<any>,
+    kwargs?: object
   ): TaskMessage {
     const message: TaskMessage = {
       headers: {},
@@ -133,10 +133,10 @@ export default class Client extends Base {
   }
 
   public sendTask(
-      taskName: string,
-      args?: Array<any>,
-      kwargs?: object,
-      taskId?: string
+    taskName: string,
+    args?: Array<any>,
+    kwargs?: object,
+    taskId?: string
   ): AsyncResult {
     taskId = taskId || v4();
     const message = this.createTaskMessage(taskId, taskName, args, kwargs);

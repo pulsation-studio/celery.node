@@ -1,7 +1,7 @@
 import Base from "./base";
-import {Message} from "../kombu/message";
-import {createClient} from "../index";
-import Client, {TaskMessage} from "./client";
+import { Message } from "../kombu/message";
+import { createClient } from "../index";
+import Client, { TaskMessage } from "./client";
 
 export default class Worker extends Base {
   handlers: object = {};
@@ -130,7 +130,7 @@ export default class Worker extends Base {
       }
 
       // request
-      const [args, kwargs , embed ] = body;
+      const [args, kwargs, embed] = body;
       const taskId = headers["id"];
 
       const handler = this.handlers[taskName];
@@ -139,29 +139,33 @@ export default class Worker extends Base {
       }
 
       console.info(
-          `celery.node Received task: ${taskName}[${taskId}], args: ${args}, kwargs: ${JSON.stringify(
-              kwargs
-          )}`
+        `celery.node Received task: ${taskName}[${taskId}], args: ${args}, kwargs: ${JSON.stringify(
+          kwargs
+        )}`
       );
 
       const timeStart = process.hrtime();
-      const chain = embed.chain
-      const taskPromise = handler(...args, kwargs).then(result => {
-        const diff = process.hrtime(timeStart);
-        if (chain !== null){
-          this.sendChainTask(chain, message)
-        }
-        console.info(
+      const chain = embed.chain;
+      const taskPromise = handler(...args, kwargs)
+        .then(result => {
+          const diff = process.hrtime(timeStart);
+          if (chain !== null) {
+            this.sendChainTask(chain, message);
+          }
+          console.info(
             `celery.node Task ${taskName}[${taskId}] succeeded in ${diff[0] +
-            diff[1] / 1e9}s: ${result}`
-        );
-        this.backend.storeResult(taskId, result, "SUCCESS");
-        this.activeTasks.delete(taskPromise);
-      }).catch(err => {
-        console.info(`celery.node Task ${taskName}[${taskId}] failed: [${err}]`);
-        this.backend.storeResult(taskId, err, "FAILURE");
-        this.activeTasks.delete(taskPromise);
-      });
+              diff[1] / 1e9}s: ${result}`
+          );
+          this.backend.storeResult(taskId, result, "SUCCESS");
+          this.activeTasks.delete(taskPromise);
+        })
+        .catch(err => {
+          console.info(
+            `celery.node Task ${taskName}[${taskId}] failed: [${err}]`
+          );
+          this.backend.storeResult(taskId, err, "FAILURE");
+          this.activeTasks.delete(taskPromise);
+        });
 
       // record the executing task
       this.activeTasks.add(taskPromise);
@@ -192,26 +196,26 @@ export default class Worker extends Base {
   }
 
   private sendChainTask(chain: Array<any>, requestMessage: Message): void {
-    const chainToSend : any[] = chain
-    const children = chainToSend.pop()
-    const client : Client = createClient(
-        this.conf.CELERY_BROKER,
-        this.conf.CELERY_BACKEND,
-        children.options.queue
-    )
-    const message : TaskMessage = {
+    const chainToSend: any[] = chain;
+    const children = chainToSend.pop();
+    const client: Client = createClient(
+      this.conf.CELERY_BROKER,
+      this.conf.CELERY_BACKEND,
+      children.options.queue
+    );
+    const message: TaskMessage = {
       headers: {
         lang: "js",
         task: children.task,
         id: children.options.task_id,
-        root_id: requestMessage.headers['root_id'],
-        parent_id: requestMessage.headers['id']
+        root_id: requestMessage.headers["root_id"],
+        parent_id: requestMessage.headers["id"]
       },
       properties: {
         correlation_id: children.options.task_id,
-        reply_to: requestMessage.properties['reply_to'],
+        reply_to: requestMessage.properties["reply_to"],
         delivery_mode: 2,
-        priority: 0,
+        priority: 0
       },
       body: [
         children.args,
@@ -223,8 +227,8 @@ export default class Worker extends Base {
           chord: null
         }
       ],
-      sentEvent:null
+      sentEvent: null
     };
-    client.sendTaskMessage(children.task, message)
+    client.sendTaskMessage(children.task, message);
   }
 }
